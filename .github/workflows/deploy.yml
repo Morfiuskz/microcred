@@ -35,5 +35,17 @@ jobs:
              docker compose down
              docker compose up -d --build
              docker image prune -f
-             curl -fsS http://localhost:8081 >/dev/null'
+             for attempt in $(seq 1 30); do
+               if curl -fsS -o /dev/null -w "%{http_code}" http://127.0.0.1:8081 | grep -q "^200$"; then
+                 echo "Healthcheck passed"
+                 exit 0
+               fi
 
+               echo "Healthcheck attempt ${attempt}/30 failed; waiting for nginx..."
+               sleep 2
+             done
+
+             echo "Healthcheck failed after 30 attempts"
+             docker ps
+             docker compose logs --tail=100
+             exit 1'
