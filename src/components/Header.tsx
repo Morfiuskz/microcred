@@ -8,10 +8,9 @@ export function Header() {
 
   return (
     <header className="fixed left-0 right-0 top-0 z-50 border-b border-border bg-bg/78 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 md:px-8">
-        <a className="flex items-center gap-3 rounded-sm focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-4 focus:ring-offset-bg" href="#top">
-          <img src={logo} alt="microcredit.kz" className="h-11 w-auto rounded-sm object-contain" />
-          <span className="hidden text-xs leading-5 text-text-secondary lg:block">понятно. честно.<br />для людей.</span>
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3 md:px-8">
+        <a className="flex items-center rounded-sm focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-4 focus:ring-offset-bg" href="#top">
+          <img src={logo} alt="microcredit.kz" className="h-11 w-32 rounded-sm object-contain object-left md:h-14 md:w-40" />
         </a>
         <nav aria-label="Основная навигация" className="hidden items-center gap-7 text-sm text-text-secondary lg:flex">
           {navigation.map((item) => (
