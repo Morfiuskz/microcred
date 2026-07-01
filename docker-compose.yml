@@ -1,0 +1,10 @@
+services:
+  microcredit-frontend:
+    container_name: microcredit-frontend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+
