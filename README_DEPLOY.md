@@ -29,6 +29,22 @@
 
 Секреты нельзя хранить в репозитории, `.env`, README или workflow-файлах.
 
+## GitHub Variables
+
+Google Analytics Measurement ID хранится как GitHub Repository variable.
+
+В GitHub откройте репозиторий:
+
+`Settings` -> `Secrets and variables` -> `Actions` -> `Variables` -> `New repository variable`
+
+Добавьте переменную:
+
+| Variable | Значение |
+| --- | --- |
+| `GA_MEASUREMENT_ID` | `G-PTPTTGJY2R` |
+
+Это не секрет, но значение не зашивается в код приложения. Vite получает его во время production build.
+
 ## Первый клон на сервер
 
 Подключитесь к VPS:
@@ -52,6 +68,18 @@ cd /opt/microcredit
 ```
 
 Если репозиторий станет private, настройте на сервере deploy key или другой разрешенный способ доступа к `git pull`.
+
+Создайте `.env` для ручных Docker-сборок на VPS:
+
+```bash
+cp .env.production.example .env
+```
+
+Проверьте значение:
+
+```bash
+cat .env
+```
 
 ## Первый запуск
 
@@ -107,6 +135,42 @@ curl -fsS http://localhost:8081
 
 Эти же команды выполняет GitHub Actions workflow после push в `main`.
 
+## Google Analytics
+
+Google Analytics 4 подключен в `index.html` через Google tag `gtag.js`.
+
+Measurement ID не хранится жестко в React-коде. Он передается в Vite через переменную:
+
+```bash
+VITE_GA_MEASUREMENT_ID=G-PTPTTGJY2R
+```
+
+Где задается значение:
+
+- Для GitHub Actions deploy: Repository variable `GA_MEASUREMENT_ID`.
+- Для ручной сборки на VPS: файл `/opt/microcredit/.env`.
+- Для локальной проверки: временный env перед командой build или локальный `.env`, который не коммитится.
+
+Изменить Measurement ID:
+
+1. Обновите GitHub Repository variable `GA_MEASUREMENT_ID`.
+2. Если используете ручной деплой на VPS, обновите `/opt/microcredit/.env`.
+3. Пересоберите контейнер:
+
+```bash
+cd /opt/microcredit
+docker compose up -d --build
+```
+
+Проверить, что Google tag попал в HTML:
+
+```bash
+VITE_GA_MEASUREMENT_ID=G-PTPTTGJY2R npm run build
+grep -n "G-PTPTTGJY2R" dist/index.html
+```
+
+В Docker production build переменная передается как build arg через `docker-compose.yml` в `Dockerfile`, потому что Vite подставляет env-переменные именно на этапе сборки.
+
 ## GitHub Actions Deploy
 
 Workflow находится в `.github/workflows/deploy.yml`.
@@ -118,7 +182,6 @@ Workflow находится в `.github/workflows/deploy.yml`.
 3. Выполняет `git pull`.
 4. Пересобирает и запускает Docker Compose.
 5. Очищает неиспользуемые Docker images.
-6. Проверяет сайт через `curl -fsS http://localhost:8081`.
+6. Проверяет сайт через retry healthcheck на `http://127.0.0.1:8081`.
 
 Если `curl` не проходит, job завершается ошибкой.
-

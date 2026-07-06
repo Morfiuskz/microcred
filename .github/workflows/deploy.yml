@@ -22,8 +22,15 @@ jobs:
 
       - name: Deploy application
         shell: bash
+        env:
+          GA_MEASUREMENT_ID: ${{ vars.GA_MEASUREMENT_ID }}
         run: |
           set -euo pipefail
+          if [ -z "${GA_MEASUREMENT_ID}" ]; then
+            echo "Repository variable GA_MEASUREMENT_ID is required"
+            exit 1
+          fi
+
           ssh \
             -i ~/.ssh/microcredit_deploy_key \
             -p "${{ secrets.VPS_PORT }}" \
@@ -32,6 +39,7 @@ jobs:
             'set -euo pipefail
              cd /opt/microcredit
              git pull
+             export VITE_GA_MEASUREMENT_ID="${{ vars.GA_MEASUREMENT_ID }}"
              docker compose down
              docker compose up -d --build
              docker image prune -f
